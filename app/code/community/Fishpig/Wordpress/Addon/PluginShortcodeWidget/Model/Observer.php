@@ -35,7 +35,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $content, $matches)) {
 			foreach($matches[0] as $key => $inlineScript) {
 				$this->addInlineScript($inlineScript);
-				
 				$content = str_replace($inlineScript, '', $content);
 			}
 		}
@@ -147,7 +146,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			}
 		}
-		
+
 		$combined = array();
 		
 		foreach($assets as $type => $asset) {
@@ -168,6 +167,13 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _getWpHeadOutput()
 	{
+		if ($this->_is404()) {
+			ob_start();
+			wp_head();
+			
+			return ob_get_clean();
+		}
+		echo Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml();exit;
 		return preg_match(
 			'/<!--WP-HEADER-->(.*)<!--\/WP-HEADER-->/Us', Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml(), $match)
 			? $match[1]
@@ -181,6 +187,13 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _getWpFooterOutput()
 	{
+		if ($this->_is404()) {
+			ob_start();
+			wp_footer();
+			
+			return ob_get_clean();
+		}
+
 		return preg_match('/<!--WP-FOOTER-->(.*)<!--\/WP-FOOTER-->/Us', Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml(), $match)
 			? $match[1]
 			: '';
@@ -263,5 +276,17 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$post->setWpPostObject(self::$wpPostCache[$post->getId()]);
 		
 		return $this;
+	}
+	
+	/*
+	 * Determine whether the current request is a 404 request
+	 *
+	 * @return bool
+	 */
+	protected function _is404()
+	{
+		$html = Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml();
+		
+		return strpos($html, '404') !== false && strpos($html, 'not found') !== false;
 	}
 }
