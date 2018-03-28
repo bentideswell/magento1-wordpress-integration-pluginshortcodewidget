@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Fishpig_Wordpress_Addon_PluginShortcodeWidget>
-			<version>1.0.0.0</version>
+			<version>1.0.0.1</version>
 		</Fishpig_Wordpress_Addon_PluginShortcodeWidget>
 	</modules>
 	<global>
@@ -42,6 +42,15 @@
 					</wp_addon_pluginshortcodewidget>
 				</observers>
 			</wordpress_sidebar_widget>
+			<wordpress_post_setasglobal_before>
+				<observers>
+					<wp_addon_pluginshortcodewidget>
+						<type>singleton</type>
+						<class>Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer</class>
+						<method>wordpressPostSetasglobalBeforeObserver</method>
+					</wp_addon_pluginshortcodewidget>
+				</observers>
+			</wordpress_post_setasglobal_before>
 		</events>
 	</frontend>
 	<wordpress>

@@ -13,6 +13,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	static protected $inlineScripts = array();
 	
+	/*
+	 * @var array
+	 */
+	static protected $wpPostCache = array();
+	
 	/**
 	 *
 	 *
@@ -56,8 +61,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function getAssets()
 	{
-#		echo Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml();exit;
-	
 		global $wp_styles, $wp_scripts;
 
 		$assets = array(
@@ -235,6 +238,29 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	public function addInlineScript($script)
 	{
 		self::$inlineScripts[] = $script;
+		
+		return $this;
+	}
+	
+	/*
+	 * Get the WP_Post object
+	 *
+	 * @param  Varien_Event_Observer $observer
+	 * @return $this
+	 */
+	public function wordpressPostSetasglobalBeforeObserver(Varien_Event_Observer $observer)
+	{
+		$post = $observer->getEvent()->getPost();
+		
+		if (!isset(self::$wpPostCache[$post->getId()])) {
+			self::$wpPostCache[$post->getId()] = false;
+			
+			if ($wpPost = get_post((int)$post->getId())) {
+				self::$wpPostCache[$post->getId()] = $wpPost;
+			}
+		}
+		
+		$post->setWpPostObject(self::$wpPostCache[$post->getId()]);
 		
 		return $this;
 	}

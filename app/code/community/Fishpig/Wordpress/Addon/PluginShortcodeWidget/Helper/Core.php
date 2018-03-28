@@ -172,12 +172,21 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Helper_Core extends Mage_Cor
 		}
 	}
 
+	/*
+	 * Get the HTML
+	 *
+	 * @return string|false
+	 */
 	public function getHtml()
 	{
 		return ($html = Mage::registry('wordpress_html'))
 			? $html: false;
 	}
-	
+
+	/*
+	 * Update an array
+	 *
+	 */
 	protected function _updateArray(&$a, $values)
 	{
 		$originals = array();
@@ -253,78 +262,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Helper_Core extends Mage_Cor
 		
 		return $this;
 	}
-	
-	/**
-	 * Get includes using path
-	 *
-	 * @param string $path
-	 * @return false|array
-	 */
-	public function getIncludesUsingPath($path)
-	{
-		if (($html = $this->getHtml()) === false) {
-			return false;
-		}
-
-		if (is_array($path)) {
-			$path = implode('|', $path);			
-		}
-
-		if (preg_match_all('/<(script|link)[^>]+(href|src)=[\'"]{1}([^\'"]{1,}(' . preg_quote($path, '/') . '.)*)[\'"]{1}/U', $html, $matches)) {
-			return array_combine($matches[3], $matches[1]);
-		}
 		
-		return false;
-	}
-	
-	public function getExternalFileTagsUsingPath($path)
-	{
-		if (($html = $this->getHtml()) === false) {
-			return false;
-		}
-
-		if (preg_match_all('/<(script|link)[^>]+(href|src)=[\'"]{1}([^\'"]{1,}' . preg_quote($path, '/') . '.*)[\'"]{1}[^>]{0,}>/U', $html, $matches)) {
-			foreach($matches[0] as $it => $match) {
-				if ($matches[1][$it] === 'script') {
-					$matches[0][$it] = $match . '</script>';
-				}
-			}
-			
-			return $matches[0];
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Get includes using path
-	 *
-	 * @param string $path
-	 * @return false|array
-	 */
-	public function getIncludesUsingPathWithDetails($path)
-	{
-		if (($html = $this->getHtml()) === false) {
-			return false;
-		}
-
-		if (preg_match_all('/<(script|link)[^>]+(href|src)=[\'"]{1}([^\'"]{1,}' . preg_quote($path, '/') . '.*)[\'"]{1}[^>]{0,}>/U', $html, $matches)) {
-			$includes = array();
-
-			foreach($matches[3] as $it => $file) {
-				$tag = substr(trim($matches[0][$it], '/<>'), strlen($matches[1][$it]));
-				
-				if (preg_match_all('/ ([a-zA-Z0-9]{1,})=[\'"]{1}([^\'"]{1,})[\'"]{1}/', $tag, $params)) {
-					$includes[$file] = array_combine($params[1], $params[2]);
-				}
-			}
-			
-			return $includes;
-		}
-		
-		return false;
-	}
-	
 	/**
 	 * Start the WordPress simulation and store the environment vars
 	 *
@@ -402,28 +340,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Helper_Core extends Mage_Cor
 	}
 	
 	/**
-	 * Get the wp_head() and wp_footer() content
-	 *
-	 * @return string
-	 **/
-	public function getWpHeadAndWpFooter()
-	{
-		$this->startWordPressSimulation();
-
-		ob_start();
-
-		wp_head();
-		wp_footer();
-		
-		$html = trim(ob_get_clean());
-		
-		$this->endWordPressSimulation();
-
-		return $html;
-	}
-	
-	
-	/**
 	 * Ensure required classes are included
 	 *
 	 * @return $this
@@ -442,5 +358,33 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Helper_Core extends Mage_Cor
 		}
 		
 		return $this;
+	}	
+
+	/*
+	 * Perform a callback during WordPress simulation mode
+	 *
+	 * @param $callback
+	 * @return mixed
+	 */
+	public function simulatedCallback($callback, array $params = array())
+	{
+		$result = null;
+		
+		if ($this->isActive()) {
+			try {
+				$this->startWordPressSimulation();
+				
+				$result = call_user_func_array($callback, $params);
+				
+				$this->endWordPressSimulation();
+			}
+			catch (Exception $e) {
+				$this->endWordPressSimulation();
+				
+				Mage::helper('wordpress')->log($e);
+			}
+		}
+		
+		return $result;
 	}
 }
