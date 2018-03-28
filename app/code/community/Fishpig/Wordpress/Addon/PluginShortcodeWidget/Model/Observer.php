@@ -39,13 +39,32 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 		}
 
-		/*
-		 * Gravity Forms
-		 */		 
+		// Gravity Forms
 		if (strpos($content, 'gform_wrapper') !== false) {
 			if (strpos($content, 'gform_ajax_frame_') !== false) {
 				if (preg_match('/<form[^>]{1,}gform[^>]{1,}(action=(["\']{1})[^\#\'"]{1,}(#.*)\\2)/U', $content, $formId)) {
 					$content = str_replace($formId[1], 'action="' . Mage::helper('wordpress')->getBaseUrl() . $formId[3] . '"', $content);
+				}
+			}
+		}
+		
+		// Revolution Slider
+		if (strpos($content, 'id="rev_slider_') !== false) {
+			if (preg_match_all('/id="rev_slider_([0-9]{1,})_([0-9]{1,})"/', $content, $matches)) {
+				$sliders = array();
+				foreach($matches[0] as $it => $match) {
+					
+					if (!isset($sliders[$matches[1][$it]])) {
+						$sliders[$matches[1][$it]] = array();
+					}
+					
+					$sliders[$matches[1][$it]][count($sliders[$matches[1][$it]])+1] = $matches[2][$it];
+				}
+			}
+			
+			foreach($sliders as $sliderId => $its) {
+				foreach($its as $key => $it) {
+					$content = str_replace('rev_slider_' . $sliderId . '_' . $it, 'rev_slider_' . $sliderId . '_' . $key, $content);
 				}
 			}
 		}
@@ -147,6 +166,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 		}
 
+
 		$combined = array();
 		
 		foreach($assets as $type => $asset) {
@@ -156,6 +176,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			}
 		}
+
 
 		return $combined;
 	}
@@ -173,9 +194,8 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			
 			return ob_get_clean();
 		}
-		echo Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml();exit;
-		return preg_match(
-			'/<!--WP-HEADER-->(.*)<!--\/WP-HEADER-->/Us', Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml(), $match)
+
+		return preg_match('/<head>(.*)<\/head>/Us', Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml(), $match)
 			? $match[1]
 			: '';
 	}	
