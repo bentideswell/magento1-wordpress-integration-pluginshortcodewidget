@@ -286,11 +286,16 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$post = $observer->getEvent()->getPost();
 		
 		if (!isset(self::$wpPostCache[$post->getId()])) {
-			self::$wpPostCache[$post->getId()] = false;
-			
-			if ($wpPost = get_post((int)$post->getId())) {
-				self::$wpPostCache[$post->getId()] = $wpPost;
-			}
+			self::$wpPostCache[$post->getId()] = Mage::helper('wp_addon_pluginshortcodewidget/core')->simulatedCallback(
+				function($post) {
+					if ($wpPost = get_post((int)$post->getId())) {
+						return $wpPost;
+					}
+				
+					return false;
+				}, 
+				array($post)
+			);
 		}
 		
 		$post->setWpPostObject(self::$wpPostCache[$post->getId()]);
