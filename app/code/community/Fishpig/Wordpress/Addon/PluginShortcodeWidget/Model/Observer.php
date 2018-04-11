@@ -17,7 +17,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 * @var array
 	 */
 	static protected $wpPostCache = array();
-	
+
 	/**
 	 *
 	 *
@@ -27,10 +27,24 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	public function applyStringFiltersObserver(Varien_Event_Observer $observer)
 	{
 		$contentTransport = $observer->getEvent()->getContent();
-		$content = $contentTransport->getContent();
 
-		$content = $this->_doShortcode($this->_doShortcode($content));
-		
+		$contentTransport->setContent(
+			$this->processString(
+				$this->_doShortcode($this->_doShortcode(
+					$contentTransport->getContent()
+				))
+			)
+		);
+	}
+
+	/**
+	 *
+	 *
+	 * @param Varien_Event_Observer $observer
+	 * @return $this
+	 */
+	public function processString($content)
+	{
 		// Extract inline scripts
 		if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $content, $matches)) {
 			foreach($matches[0] as $key => $inlineScript) {
@@ -69,9 +83,9 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 		}
 		
-		$contentTransport->setContent($content);
+		return $content;
 	}
-	
+		
 	/*
 	 * Get the CSS, JS and other content required for the plugin to function in Magento
 	 *
@@ -179,6 +193,52 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 
 
 		return $combined;
+	}
+	
+	
+	/*
+	 * Get the WordPress post content
+	 * This adds support for the Elementor plugin
+	 *
+	 *
+	 * @param  Varien_Event_Observer $observer
+	 * @return $this
+	 */
+	public function wordpressGetPostContentObserver(Varien_Event_Observer $observer)
+	{
+		$post      = $observer->getEvent()->getPost();
+		$transport = $observer->getEvent()->getTransport();
+		
+		try {
+			if ($post->getMetaValue('_elementor_edit_mode') !== 'builder') {
+				return $this;
+			}
+			
+			$coreHelper = Mage::helper('wp_addon_pluginshortcodewidget/core');
+			
+			if (!$coreHelper->isActive()) {
+				return $this;
+			}
+			
+			$coreHelper->startWordPressSimulation();
+			$post->setAsGlobal();
+			
+			ob_start();
+			
+			the_content();
+			
+			$content = ob_get_clean();
+
+			$coreHelper->endWordPressSimulation();
+
+			$transport->setPostContent($this->processString($content));
+		}
+		catch (Exception $e) {
+			Mage::helper('wordpress')->log($e);
+			$coreHelper->endWordPressSimulation();
+		}
+		
+		return $this;
 	}
 	
 	/*
