@@ -130,7 +130,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Helper_Core extends Mage_Cor
 					$this->__('Unable to find wp-load.php at %s', dirname($file))
 				);
 			}
-			
+
 			// Fix for Multisite set_prefix error
 			global $wpdb;
 

@@ -111,6 +111,12 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 					$assets['head']['script_wp_head_' . $key] = $match;
 				}
 			}
+			
+			if (preg_match_all('/<style[^>]{0,}>.*<\/style>/Us', $wpHead, $matches)) {
+				foreach($matches[0] as $key => $match) {
+					$assets['head']['style_wp_head_' . $key] = $match;
+				}
+			}
 		}
 
 		/*
@@ -120,6 +126,12 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $wpFooter, $matches)) {
 				foreach($matches[0] as $key => $match) {
 					$assets['footer']['script_wp_footer_' . $key] = $match;
+				}
+			}
+			
+			if (preg_match_all('/<style[^>]{0,}>.*<\/style>/Us', $wpFooter, $matches)) {
+				foreach($matches[0] as $key => $match) {
+					$assets['footer']['style_wp_footer_' . $key] = $match;
 				}
 			}
 		}
