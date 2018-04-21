@@ -41,8 +41,10 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Helper_Core extends Mage_Cor
 		}
 
 		if ((int)Mage::app()->getStore()->getId() === 0) {
-			return;
-		}		
+			if (strpos(Mage::app()->getRequest()->getControllerName(), 'wordpress') !== 0) {
+				return;
+			}
+		}	
 		
 		try {
 			if (($path = Mage::helper('wordpress')->getWordPressPath()) === false) {
