@@ -26,6 +26,14 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function applyStringFiltersObserver(Varien_Event_Observer $observer)
 	{
+		// Fix Documentor counter global
+		foreach($GLOBALS as $key => $value) {
+			if (strpos($key, 'doc_style_counter_') === 0) {
+				unset($GLOBALS[$key]);
+			}
+		}
+
+		// Get the content, call doShortcode and set the content again
 		$contentTransport = $observer->getEvent()->getContent();
 
 		$contentTransport->setContent(
@@ -37,7 +45,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		);
 	}
 
-	/**
+	/*
 	 *
 	 *
 	 * @param Varien_Event_Observer $observer
@@ -50,6 +58,14 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			foreach($matches[0] as $key => $inlineScript) {
 				$this->addInlineScript($inlineScript);
 				$content = str_replace($inlineScript, '', $content);
+			}
+		}
+		
+		// Extract inline styles
+		if (preg_match_all('/<link[^>]{0,}>/Us', $content, $matches)) {
+			foreach($matches[0] as $key => $inlineStyle) {
+				$this->addInlineScript($inlineStyle);
+				$content = str_replace($inlineStyle, '', $content);
 			}
 		}
 
