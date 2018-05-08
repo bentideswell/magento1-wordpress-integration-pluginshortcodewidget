@@ -155,7 +155,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		/*
 		 * Queued Scripts
 		 */
-		if ($wp_scripts->queue) {
+		if (isset($wp_scripts) && $wp_scripts->queue) {
 			$wp_scripts->do_concat = false;
 
 			foreach($wp_scripts->queue as $item) {
@@ -185,7 +185,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		/*
 		 * Queued Styles
 		 */
-		if ($wp_styles->queue) {
+		if (isset($wp_styles) && $wp_styles->queue) {
 			$wp_styles->do_concat = false;
 			
 			foreach($wp_styles->queue as $item) {
@@ -207,7 +207,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			}
 		}
-
 
 		$combined = array();
 		

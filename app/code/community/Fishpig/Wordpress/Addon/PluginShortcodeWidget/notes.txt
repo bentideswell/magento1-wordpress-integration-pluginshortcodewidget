@@ -1,57 +1,9 @@
 /**
  * @category Fishpig
- * @package Fishpig_Wordpress_Addon_VisualComposer
- * @url https://fishpig.co.uk/magento/wordpress-integration/visual-composer/
+ * @package Fishpig_Wordpress_Addon_PluginShortcodeWidget
+ * @url https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author Ben Tideswell <ben@fishpig.co.uk>
  */
 
-1.1.0.31
-- Added fix for Composium
-
-1.1.0.25
-- Fix when using Slider Revolution with Visual Composer
-
-1.1.0.24
-- Added fix for per post/page custom CSS.
-
-1.1.0.23
-- Added support for Massive Add-ons
-
-1.1.0.19
-- Added better error logging
-
-1.1.0.17
-- Added custom tab implementation so that the Tabs feature of Visual Composer is now supported.
-
-1.1.0.16
-- Fixed cookie notice issue.
-
-1.1.0.4
-- Fixed body class issue
-
-1.1.0.0
-- You can now use Visual Composer shortcodes anywhere. This update requires Magento WordPress Integration version 4.2.0.0 or higher. To use the shortcode, use <?php echo Mage::helper('wordpress/filter')->process('[vc-shortcode id="34"]') ?> You will need to change the actual shortcode to match your shortcode.
-
-1.0.2.1
-- Fixed Ultimate Add-ons Timeline issue and added support for Smile Fonts.
-
-1.0.2.0
-- Added support for the Ultimate VC Add-ons plugin and the Parallax Background add-on.
-
-1.0.1.11
-- Added support for the Hot Spot add-on for Visual Composer
-
-1.0.1.5
-- Fixed issue where vc-ie8.css was included on every page rather than just IE 8.
-
-1.0.1.1
-- Added fix for VC code not firing when viewing post in a post list.
-
-1.0.0.10
-- Added support for the Composium and Magnic Popup VC Add-on.
-
-1.0.0.9
-- Fixed issue that broke post grid.
-
-1.0.0.8
-- Fixed issue that stopped custom design options such as custom backgrounds from displaying.
+- 1.0.0.11
+- Fixed error that occurred when no queued styles could be found in WordPress.
