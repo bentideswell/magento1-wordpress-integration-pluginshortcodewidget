@@ -79,6 +79,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		}
 		
 		// Revolution Slider
+		/*
 		if (strpos($content, 'id="rev_slider_') !== false) {
 			if (preg_match_all('/id="rev_slider_([0-9]{1,})_([0-9]{1,})"/', $content, $matches)) {
 				$sliders = array();
@@ -98,7 +99,8 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			}
 		}
-		
+		*/
+
 		return $content;
 	}
 		

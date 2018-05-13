@@ -1,9 +1,12 @@
 /**
  * @category Fishpig
- * @package Fishpig_Wordpress_Addon_PluginShortcodeWidget
- * @url https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
- * @author Ben Tideswell <ben@fishpig.co.uk>
+ * @package  Fishpig_Wordpress_Addon_PluginShortcodeWidget
+ * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
+ * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
+
+- 1.0.0.12
+- Fixed Revolution Slider issue.
 
 - 1.0.0.11
 - Fixed error that occurred when no queued styles could be found in WordPress.
