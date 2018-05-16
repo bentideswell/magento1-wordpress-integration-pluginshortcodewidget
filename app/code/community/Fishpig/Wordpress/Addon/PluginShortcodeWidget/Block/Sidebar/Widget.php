@@ -1,6 +1,7 @@
 <?php
 /*
  *
+ * @Obfuscate
  */
 class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends Mage_Core_Block_Text
 {
