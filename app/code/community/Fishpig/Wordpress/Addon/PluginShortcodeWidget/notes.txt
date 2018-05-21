@@ -5,6 +5,9 @@
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
 
+- 1.0.0.14
+- Fixed bug with widget title
+
 - 1.0.0.12
 - Fixed Revolution Slider issue.
 

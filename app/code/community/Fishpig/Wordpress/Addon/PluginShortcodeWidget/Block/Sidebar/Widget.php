@@ -31,7 +31,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends
 			$newInstance = clone $instance;
 	
 			$widgetOptions = $this->_getInstanceOptions($this->getWidgetType(), $this->getWidgetIndex());
-			
+
 			if ($widgetOptions) {
 				foreach($widgetOptions as $option => $value) {
 					$newInstance->$option = $value;
@@ -41,14 +41,14 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends
 	    ob_start();
 	
 			$args = array(
-				'widget_id'=>$widgetName,
+				'widget_id' => $widgetName,
 				'before_widget' => '<div class="block block-blog">',
 				'after_widget' => '</div>',
 				'before_title' => '<div class="block-title"><strong><span>',
 				'after_title' => '</span></strong></div>'
 	    );
-	    
-	    if ($title) {
+
+	    if (!empty($widgetOptions['title'])) {
 		    $args['after_title'] .= '<div class="block-content">';
 		    $args['after_widget'] = '</div></div>';
 	    }
