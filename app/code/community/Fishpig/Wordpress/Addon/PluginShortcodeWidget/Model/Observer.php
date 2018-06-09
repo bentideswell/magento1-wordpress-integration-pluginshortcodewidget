@@ -112,6 +112,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function getAssets()
 	{
+		
 		global $wp_styles, $wp_scripts;
 
 		$assets = array(
@@ -240,30 +241,28 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$transport = $observer->getEvent()->getTransport();
 		
 		try {
-			if ($post->getMetaValue('_elementor_edit_mode') !== 'builder') {
-				return $this;
-			}
-			
-			$coreHelper = Mage::helper('wp_addon_pluginshortcodewidget/core');
-			
-			if (!$coreHelper->isActive()) {
-				return $this;
-			}
-			
-			$coreHelper->startWordPressSimulation();
-			$post->setAsGlobal();
-			
-			ob_start();
-			
-			the_content();
-			
-			$content = ob_get_clean();
+			$canRun = isset($_GET['fl_builder'])                                     // BeaverBuilder
+								|| $post->getMetaValue('_elementor_edit_mode') !== 'builder';  // Elementor
 
-			$coreHelper->endWordPressSimulation();
+			if (!$canRun) {
+				return $this;
+			}
+			
+			$post->setAsGlobal();
+
+			$content = Mage::helper('wp_addon_pluginshortcodewidget/core')->simulatedCallback(
+				function() {
+					ob_start();
+					the_content();
+					
+					return ob_get_clean();
+				}
+			);
 
 			$transport->setPostContent($this->processString($content));
 		}
 		catch (Exception $e) {
+			exit($e);
 			Mage::helper('wordpress')->log($e);
 			$coreHelper->endWordPressSimulation();
 		}
