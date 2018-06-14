@@ -242,7 +242,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		
 		try {
 			$canRun = isset($_GET['fl_builder'])                                     // BeaverBuilder
-								|| $post->getMetaValue('_elementor_edit_mode') !== 'builder';  // Elementor
+								|| $post->getMetaValue('_elementor_edit_mode') === 'builder';  // Elementor
 
 			if (!$canRun) {
 				return $this;
