@@ -18,7 +18,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 * @var array
 	 */
 	static protected $wpPostCache = array();
-
+	
 	/**
 	 *
 	 *
@@ -112,7 +112,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function getAssets()
 	{
-		
 		global $wp_styles, $wp_scripts;
 
 		$assets = array(
@@ -250,7 +249,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			
 			$post->setAsGlobal();
 
-			$content = Mage::helper('wp_addon_pluginshortcodewidget/core')->simulatedCallback(
+			$content = $this->getCoreHelper()->simulatedCallback(
 				function() {
 					ob_start();
 					the_content();
@@ -262,7 +261,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			$transport->setPostContent($this->processString($content));
 		}
 		catch (Exception $e) {
-			exit($e);
 			Mage::helper('wordpress')->log($e);
 			$coreHelper->endWordPressSimulation();
 		}
@@ -278,13 +276,17 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	protected function _getWpHeadOutput()
 	{
 		if ($this->_is404()) {
-			ob_start();
-			wp_head();
+			return $this->getCoreHelper()->simulatedCallback(
+				function() {
+					ob_start();
+					wp_head();
 			
-			return ob_get_clean();
+					return ob_get_clean();
+				}
+			);
 		}
 
-		return preg_match('/<head>(.*)<\/head>/Us', Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml(), $match)
+		return preg_match('/<head>(.*)<\/head>/Us', $this->getCoreHelper()->getHtml(), $match)
 			? $match[1]
 			: '';
 	}	
@@ -297,13 +299,17 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	protected function _getWpFooterOutput()
 	{
 		if ($this->_is404()) {
-			ob_start();
-			wp_footer();
+			return $this->getCoreHelper()->simulatedCallback(
+				function() {
+					ob_start();
+					wp_footer();
 			
-			return ob_get_clean();
+					return ob_get_clean();
+				}
+			);
 		}
 
-		return preg_match('/<!--WP-FOOTER-->(.*)<!--\/WP-FOOTER-->/Us', Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml(), $match)
+		return preg_match('/<!--WP-FOOTER-->(.*)<!--\/WP-FOOTER-->/Us', $this->getCoreHelper()->getHtml(), $match)
 			? $match[1]
 			: '';
 	}
@@ -316,25 +322,15 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _doShortcode($code)
 	{
-		try {
-			$coreHelper = Mage::helper('wp_addon_pluginshortcodewidget/core');
-			
-			if ($coreHelper->isActive()) {
-				$coreHelper->startWordPressSimulation();
-				$value = do_shortcode($code);
-				$coreHelper->endWordPressSimulation();
-				
-				// Fix HTML entity data parameters
-				$value = str_replace(array('&#091;', '&#093;'), array('[', ']'), $value);
-	
-				return $value;
-			}
-		}
-		catch (Exception $e) {
-			Mage::helper('wordpress')->log($e);
-		}
-		
-		return $code;
+		return $this->getCoreHelper()->simulatedCallback(
+			function($code) {
+				return str_replace(
+					array('&#091;', '&#093;'), 
+					array('[', ']'), 
+					do_shortcode($code)
+				);
+			}, array($code)
+		);
 	}
 	
 	/*
@@ -375,7 +371,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$post = $observer->getEvent()->getPost();
 		
 		if (!isset(self::$wpPostCache[$post->getId()])) {
-			self::$wpPostCache[$post->getId()] = Mage::helper('wp_addon_pluginshortcodewidget/core')->simulatedCallback(
+			self::$wpPostCache[$post->getId()] = $this->getCoreHelper()->simulatedCallback(
 				function($post) {
 					if ($wpPost = get_post((int)$post->getId())) {
 						return $wpPost;
@@ -399,8 +395,13 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _is404()
 	{
-		$html = Mage::helper('wp_addon_pluginshortcodewidget/core')->getHtml();
+		$html = $this->getCoreHelper()->getHtml();
 		
 		return strpos($html, '404') !== false && strpos($html, 'not found') !== false;
 	}
+	
+	public static function getCoreHelper()
+	{
+		return Mage::helper('wp_addon_pluginshortcodewidget/core');
+	}	
 }
