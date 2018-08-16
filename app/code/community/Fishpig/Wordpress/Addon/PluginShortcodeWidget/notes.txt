@@ -5,6 +5,9 @@
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
 
+- 1.0.0.21
+- Widget integration improvements
+
 - 1.0.0.16
 - Fixed bug that stopped product shortcode from working.
 

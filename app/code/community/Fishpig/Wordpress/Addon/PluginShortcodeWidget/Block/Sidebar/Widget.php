@@ -1,7 +1,6 @@
 <?php
 /*
  *
- * @Obfuscate
  */
 class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends Mage_Core_Block_Text
 {
@@ -11,66 +10,76 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends
 	protected function _toHtml()
 	{
 		try {
-			$widgetName = $this->getWidgetType() . '-' . $this->getWidgetIndex();
-	    $instance = false;
-
-	    global $wp_widget_factory;
-	    
-			foreach($wp_widget_factory->widgets as $key => $value) {
-				if ($value->id === $widgetName) {
-					$instance = $value;
-					$widgetName = $key;
-					break;
-				}
-			}
-			
-			if (!$instance) {
-				return '';
-			}    
-	
-			$newInstance = clone $instance;
-	
+			$widgetId    = $this->getWidgetType() . '-' . $this->getWidgetIndex();
 			$widgetOptions = $this->_getInstanceOptions($this->getWidgetType(), $this->getWidgetIndex());
 
-			if ($widgetOptions) {
-				foreach($widgetOptions as $option => $value) {
-					$newInstance->$option = $value;
-				}
-			}
+			$widgetHtml    = Mage::helper('wp_addon_pluginshortcodewidget/core')->simulatedCallback(
+				function($widgetId, $widgetOptions) {
+			    $instance = false;
+		
+			    global $wp_widget_factory;
 
-	    ob_start();
+					$args = array(
+						'widget_id' => $widgetId,
+						'widget_name' => $wp_registered_widgets[ $widgetId ]['name'],
+						'before_widget' => '<div class="block block-blog">',
+						'after_widget' => '</div>',
+						'before_title' => '<div class="block-title"><strong><span>',
+						'after_title' => '</span></strong></div>'
+			    );
+		
+			    if (!empty($widgetOptions['title'])) {
+				    $args['after_title'] .= '<div class="block-content">';
+				    $args['after_widget'] = '</div></div>';
+			    }
+			    else {
+				    $args['before_widget'] .= '<div class="block-content">';
+				    $args['after_widget'] = '</div></div>';
+			    }
+
+					foreach($wp_widget_factory->widgets as $key => $value) {
+						if ($value->id === $widgetId) {
+							$instance = $value;
+							$widgetId = $key;
+							break;
+						}
+					}
+
+					if (!$instance) {
+						return false;
+					}
+
+					$newInstance = clone $instance;
+
+					if ($widgetOptions) {
+						foreach($widgetOptions as $option => $value) {
+							$newInstance->$option = $value;
+						}
+					}
 	
-			$args = array(
-				'widget_id' => $widgetName,
-				'before_widget' => '<div class="block block-blog">',
-				'after_widget' => '</div>',
-				'before_title' => '<div class="block-title"><strong><span>',
-				'after_title' => '</span></strong></div>'
-	    );
-
-	    if (!empty($widgetOptions['title'])) {
-		    $args['after_title'] .= '<div class="block-content">';
-		    $args['after_widget'] = '</div></div>';
-	    }
-	    else {
-		    $args['before_widget'] .= '<div class="block-content">';
-		    $args['after_widget'] = '</div></div>';
-	    }
+			    ob_start();
 	    
-	    the_widget($widgetName, $newInstance, $args);
-	    
-	    $output = ob_get_clean();
-	    $output = str_replace('<li>', '<li class="item">', $output);
-
-			if (preg_match_all('/(<script[^>]{0,}>)(.*)(<\/script>)/Us', $output, $matches)) {
-				foreach($matches[0] as $key => $script) {
-					$output = str_replace($script, '', $output);
-
-					Mage::getSingleton('wp_addon_pluginshortcodewidget/observer')->addInlineScript($script);
-				}	
-			}
-
-	    return $output;
+			    the_widget($widgetId, $newInstance, $args);
+			    
+			    $output = ob_get_clean();
+			    $output = str_replace('<li>', '<li class="item">', $output);
+					
+					return $output;
+				},
+				array($widgetId, $widgetOptions)
+			);
+			
+			if ($widgetHtml) {
+				if (preg_match_all('/(<script[^>]{0,}>)(.*)(<\/script>)/Us', $widgetHtml, $matches)) {
+					foreach($matches[0] as $key => $script) {
+						$widgetHtml = str_replace($script, '', $widgetHtml);
+	
+						Mage::getSingleton('wp_addon_pluginshortcodewidget/observer')->addInlineScript($script);
+					}	
+				}
+	
+				return $widgetHtml;
+		  }
 	  }
 	  catch (Exception $e) {
 		  Mage::helper('wordpress')->log($e->getMessage());
@@ -89,14 +98,28 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends
 	protected function _getInstanceOptions($type, $id)
 	{
 		if ($options = Mage::helper('wordpress')->getWpOption('widget_' . $type)) {
-			if ($options = @unserialize($options, array('allowed_classes' => false))) {
+			if ($options = $this->_unserialize($options)) {
 				if (isset($options[$id])) {
 					return $options[$id];
 				}
 			}
 		}
-		
+
 		return array();
 	}
 	
+	/*
+	 * PHP version safe unserialize function
+	 *
+	 * @param string $s
+	 * @return array|false
+	 */
+	protected function _unserialize($s)
+	{
+		if (version_compare(PHP_VERSION, '7.0.0', '>=')) {
+			return @unserialize($s, array('allowed_classes' => false));
+		}
+		
+		return @unserialize($s);
+	}
 }
