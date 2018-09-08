@@ -17,11 +17,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Block_Sidebar_Widget extends
 				function($widgetId, $widgetOptions) {
 			    $instance = false;
 		
-			    global $wp_widget_factory;
+			    global $wp_widget_factory, $wp_registered_widgets;
 
 					$args = array(
 						'widget_id' => $widgetId,
-						'widget_name' => $wp_registered_widgets[ $widgetId ]['name'],
+						'widget_name' => isset($wp_registered_widgets[$widgetId]['name']) ? $wp_registered_widgets[ $widgetId ]['name'] : '',
 						'before_widget' => '<div class="block block-blog">',
 						'after_widget' => '</div>',
 						'before_title' => '<div class="block-title"><strong><span>',
