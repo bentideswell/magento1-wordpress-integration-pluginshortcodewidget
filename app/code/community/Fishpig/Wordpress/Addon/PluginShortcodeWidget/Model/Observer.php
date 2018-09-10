@@ -241,7 +241,9 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		
 		try {
 			if (!$this->isVisualEditorMode()) {
-				return $this;
+				if ($post->getMetaValue('_elementor_edit_mode') !== 'builder') {
+					return $this;
+				}
 			}
 			
 			$post->setAsGlobal();
