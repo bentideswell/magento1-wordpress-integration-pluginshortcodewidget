@@ -240,11 +240,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$transport = $observer->getEvent()->getTransport();
 		
 		try {
-			if (!$this->isVisualEditorMode()) {
-				if ($post->getMetaValue('_elementor_edit_mode') !== 'builder') {
-					return $this;
-				}
-			}
+#			if (!$this->isVisualEditorMode()) {
+#				if ($post->getMetaValue('_elementor_edit_mode') !== 'builder') {
+#					return $this;
+#				}
+#			}
 			
 			$post->setAsGlobal();
 
@@ -257,6 +257,10 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			);
 
+			$content = str_replace(['″', '”'], '"', html_entity_decode($content));
+
+			Mage::helper('wordpress/shortcode_product')->apply($content, $post);
+			
 			$transport->setPostContent($this->processString($content));
 		}
 		catch (Exception $e) {
@@ -373,6 +377,8 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			self::$wpPostCache[$post->getId()] = $this->getCoreHelper()->simulatedCallback(
 				function($post) {
 					if ($wpPost = get_post((int)$post->getId())) {
+						setup_postdata($wpPost);
+						
 						return $wpPost;
 					}
 				
