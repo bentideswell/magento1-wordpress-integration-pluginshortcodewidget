@@ -250,7 +250,13 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 
 			$content = $this->getCoreHelper()->simulatedCallback(
 				function() {
+					global $more;
+					
 					ob_start();
+					
+					// Ensure all content is displayed
+					$more = 1;
+					
 					the_content();
 					
 					return ob_get_clean();
