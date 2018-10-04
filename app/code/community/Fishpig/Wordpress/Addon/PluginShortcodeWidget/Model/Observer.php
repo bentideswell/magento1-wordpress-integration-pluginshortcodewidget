@@ -114,6 +114,12 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	{
 		global $wp_styles, $wp_scripts;
 
+		if (preg_match('/<body[^>]+class="(.*)"/U', $this->getCoreHelper()->getHtml(), $classMatches)) {
+			$bodyClasses = explode(' ', str_replace('  ', ' ', trim($classMatches[1])));
+			
+			$this->addInlineScript('<script type="text/javascript">document.body.className+=\' ' . implode(' ', array_unique($bodyClasses)) . '\';</script>');
+		}
+		
 		$assets = array(
 			'head' => array(),
 			'inline' => self::$inlineScripts,
@@ -284,20 +290,18 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _getWpHeadOutput()
 	{
-		if ($this->_is404()) {
-			return $this->getCoreHelper()->simulatedCallback(
-				function() {
-					ob_start();
-					wp_head();
-			
-					return ob_get_clean();
-				}
-			);
-		}
+		$wpHead = $this->getCoreHelper()->simulatedCallback(function() {
+			ob_start();
+			wp_head();
+		
+			return ob_get_clean();
+		});
 
-		return preg_match('/<head>(.*)<\/head>/Us', $this->getCoreHelper()->getHtml(), $match)
-			? $match[1]
-			: '';
+		if (preg_match('/<head>(.*)<\/head>/Us', $this->getCoreHelper()->getHtml(), $match)) {
+			$wpHead .= $match[1];
+		}
+		
+		return $wpHead;
 	}	
 
 	/*
@@ -307,20 +311,18 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _getWpFooterOutput()
 	{
-		if ($this->_is404()) {
-			return $this->getCoreHelper()->simulatedCallback(
-				function() {
-					ob_start();
-					wp_footer();
-			
-					return ob_get_clean();
-				}
-			);
-		}
+		$wpFooter = $this->getCoreHelper()->simulatedCallback(function() {
+			ob_start();
+			wp_footer();
+		
+			return ob_get_clean();
+		});
 
-		return preg_match('/<!--WP-FOOTER-->(.*)<!--\/WP-FOOTER-->/Us', $this->getCoreHelper()->getHtml(), $match)
-			? $match[1]
-			: '';
+		if (preg_match('/<!--WP-FOOTER-->(.*)<!--\/WP-FOOTER-->/Us', $this->getCoreHelper()->getHtml(), $match)) {
+			$wpFooter .= $match[1];
+		}
+		
+		return $wpFooter;
 	}
 	
 	/**
@@ -411,6 +413,9 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return strpos($html, '404') !== false && strpos($html, 'not found') !== false;
 	}
 	
+	/*
+	 *
+	 */
 	public static function getCoreHelper()
 	{
 		return Mage::helper('wp_addon_pluginshortcodewidget/core');
