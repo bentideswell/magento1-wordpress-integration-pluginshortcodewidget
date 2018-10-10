@@ -269,7 +269,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			);
 
-			$content = str_replace(['″', '”'], '"', html_entity_decode($content));
+#			$content = str_replace(['″', '”'], '"', html_entity_decode($content));
 
 			Mage::helper('wordpress/shortcode_product')->apply($content, $post);
 			
