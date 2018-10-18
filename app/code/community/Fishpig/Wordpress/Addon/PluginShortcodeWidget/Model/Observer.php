@@ -269,9 +269,13 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			);
 
-#			$content = str_replace(['″', '”'], '"', html_entity_decode($content));
+			if (strpos($content, '[product ') !== false) {
+				$content = preg_replace_callback('/\[product[^\]]*\]/', function($matches) {
+					return str_replace(array('&#8221;', '&#8243;'), '"', $matches[0]);
+				}, $content);
 
-			Mage::helper('wordpress/shortcode_product')->apply($content, $post);
+				Mage::helper('wordpress/shortcode_product')->apply($content, $post);
+			}
 			
 			$transport->setPostContent($this->processString($content));
 		}

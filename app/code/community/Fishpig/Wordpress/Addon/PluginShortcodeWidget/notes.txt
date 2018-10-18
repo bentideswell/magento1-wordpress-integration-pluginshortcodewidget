@@ -4,6 +4,10 @@
  * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
+ 
+- 1.0.0.29
+- Added fix for product shortcode
+
 - 1.0.0.22
 - Added support for the WPBakery Page Builder Frontend Editor.
 
