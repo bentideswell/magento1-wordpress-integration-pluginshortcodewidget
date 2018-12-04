@@ -5,6 +5,9 @@
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
  
+- 1.0.0.30
+- Add HTML in wp_footer into Magento
+
 - 1.0.0.29
 - Added fix for product shortcode
 

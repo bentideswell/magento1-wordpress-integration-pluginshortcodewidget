@@ -123,6 +123,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$assets = array(
 			'head' => array(),
 			'inline' => self::$inlineScripts,
+			'html'   => array(),
 			'footer' => array(),
 			'queued' => array(),
 		);
@@ -150,14 +151,20 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		if ($wpFooter = $this->_getWpFooterOutput()) {
 			if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $wpFooter, $matches)) {
 				foreach($matches[0] as $key => $match) {
+					$wpFooter = str_replace($match, '', $wpFooter);
 					$assets['footer']['script_wp_footer_' . $key] = $match;
 				}
 			}
 			
 			if (preg_match_all('/<style[^>]{0,}>.*<\/style>/Us', $wpFooter, $matches)) {
 				foreach($matches[0] as $key => $match) {
+					$wpFooter = str_replace($match, '', $wpFooter);
 					$assets['footer']['style_wp_footer_' . $key] = $match;
 				}
+			}
+			
+			if (trim($wpFooter)) {
+				$assets['html']['html_wp_footer'] = $wpFooter;
 			}
 		}
 
@@ -227,7 +234,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 		}
 
-
 		return $combined;
 	}
 	
@@ -246,12 +252,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$transport = $observer->getEvent()->getTransport();
 		
 		try {
-#			if (!$this->isVisualEditorMode()) {
-#				if ($post->getMetaValue('_elementor_edit_mode') !== 'builder') {
-#					return $this;
-#				}
-#			}
-			
 			$post->setAsGlobal();
 
 			$content = $this->getCoreHelper()->simulatedCallback(
@@ -280,9 +280,39 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			$transport->setPostContent($this->processString($content));
 		}
 		catch (Exception $e) {
-			Mage::helper('wordpress')->log($e);
 			$coreHelper->endWordPressSimulation();
+			Mage::helper('wordpress')->log($e);
 		}
+		
+		return $this;
+	}
+	
+	/*
+	 * Get the WP_Post object
+	 *
+	 * @param  Varien_Event_Observer $observer
+	 * @return $this
+	 */
+	public function wordpressPostSetasglobalBeforeObserver(Varien_Event_Observer $observer)
+	{
+		$post = $observer->getEvent()->getPost();
+		
+		if (!isset(self::$wpPostCache[$post->getId()])) {
+			self::$wpPostCache[$post->getId()] = $this->getCoreHelper()->simulatedCallback(
+				function($post) {
+					if ($wpPost = get_post((int)$post->getId())) {
+						setup_postdata($wpPost);
+						
+						return $wpPost;
+					}
+				
+					return false;
+				}, 
+				array($post)
+			);
+		}
+		
+		$post->setWpPostObject(self::$wpPostCache[$post->getId()]);
 		
 		return $this;
 	}
@@ -337,15 +367,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	protected function _doShortcode($code)
 	{
-		return $this->getCoreHelper()->simulatedCallback(
-			function($code) {
-				return str_replace(
-					array('&#091;', '&#093;'), 
-					array('[', ']'), 
-					do_shortcode($code)
-				);
-			}, array($code)
-		);
+		return $this->getCoreHelper()->doShortcode($code);
 	}
 	
 	/*
@@ -371,36 +393,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	public function addInlineScript($script)
 	{
 		self::$inlineScripts[] = $script;
-		
-		return $this;
-	}
-	
-	/*
-	 * Get the WP_Post object
-	 *
-	 * @param  Varien_Event_Observer $observer
-	 * @return $this
-	 */
-	public function wordpressPostSetasglobalBeforeObserver(Varien_Event_Observer $observer)
-	{
-		$post = $observer->getEvent()->getPost();
-		
-		if (!isset(self::$wpPostCache[$post->getId()])) {
-			self::$wpPostCache[$post->getId()] = $this->getCoreHelper()->simulatedCallback(
-				function($post) {
-					if ($wpPost = get_post((int)$post->getId())) {
-						setup_postdata($wpPost);
-						
-						return $wpPost;
-					}
-				
-					return false;
-				}, 
-				array($post)
-			);
-		}
-		
-		$post->setWpPostObject(self::$wpPostCache[$post->getId()]);
 		
 		return $this;
 	}
