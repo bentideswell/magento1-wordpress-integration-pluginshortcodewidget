@@ -277,6 +277,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				Mage::helper('wordpress/shortcode_product')->apply($content, $post);
 			}
 			
+			if (strpos($content, '{{') !== false) {
+				$content = preg_replace('/<p>(\{\{.*\}\})<\/p>/Us', '$1', $content);
+				$content = Mage::helper('cms')->getBlockTemplateProcessor()->filter($content);
+			}
+
 			$transport->setPostContent($this->processString($content));
 		}
 		catch (Exception $e) {
