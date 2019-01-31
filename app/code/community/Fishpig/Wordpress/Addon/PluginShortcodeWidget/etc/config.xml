@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Fishpig_Wordpress_Addon_PluginShortcodeWidget>
-			<version>1.0.0.32</version>
+			<version>1.0.0.33</version>
 		</Fishpig_Wordpress_Addon_PluginShortcodeWidget>
 	</modules>
 	<global>
@@ -70,6 +70,7 @@
 			<globals>
 				<revSliderVersion />
 				<rs_double_jquery_script/>
+				<pagelist_unq_settings/>
 			</globals>
 		</core>
 	</wordpress>

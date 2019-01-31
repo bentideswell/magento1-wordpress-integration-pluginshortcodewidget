@@ -4,7 +4,9 @@
  * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
- 
+- 1.0.0.33 
+- Added support for the Page-List plugin.
+
 - 1.0.0.30
 - Add HTML in wp_footer into Magento
 
