@@ -440,4 +440,34 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		
 		return false;
 	}
+	
+	/*
+	 * Add support for Elementor templates
+	 *
+	 * @param  Varien_Event_Observer $observer
+	 * @return $this
+	 */
+	public function wordpressRouterSetRoutePathObserver(Varien_Event_Observer $observer)
+	{
+		$elemLibrary = Mage::app()->getRequest()->getParam('elementor_library');
+		$elemPreview = (int)Mage::app()->getRequest()->getParam('elementor-preview');
+		
+		if (!$elemLibrary && !$elemPreview) {
+			return $this;
+		}
+
+		$transport = $observer->getEvent()->getTransport();
+		
+		$transport->setPath(array(
+			'module' => 'wordpress',
+			'controller' => 'post',
+			'action' => 'view',
+		));
+
+		$transport->setParams(
+			array_merge($transport->getParams(), array('p' => $elemPreview))
+		);
+
+		return $this;
+	}
 }
