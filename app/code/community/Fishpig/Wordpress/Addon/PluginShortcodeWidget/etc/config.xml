@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Fishpig_Wordpress_Addon_PluginShortcodeWidget>
-			<version>1.0.0.34</version>
+			<version>1.0.0.35</version>
 		</Fishpig_Wordpress_Addon_PluginShortcodeWidget>
 	</modules>
 	<global>
@@ -71,6 +71,17 @@
 					</wp_addon_pluginshortcodewidget>
 				</observers>
 			</wordpress_get_post_content>
+			<!--
+			<wordpress_post_view_to_html>
+				<observers>
+					<wp_addon_pluginshortcodewidget>
+						<type>singleton</type>
+						<class>Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer</class>
+						<method>wordpressPostViewToHtmlObserver</method>
+					</wp_addon_pluginshortcodewidget>
+				</observers>				
+			</wordpress_post_view_to_html>
+			-->
 		</events>
 	</frontend>
 	<wordpress>

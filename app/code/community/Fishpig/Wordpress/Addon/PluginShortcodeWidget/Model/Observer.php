@@ -246,24 +246,29 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	{
 		$post      = $observer->getEvent()->getPost();
 		$transport = $observer->getEvent()->getTransport();
-		
+
 		try {
 			$post->setAsGlobal();
 
-			$content = $this->getCoreHelper()->simulatedCallback(
-				function() {
-					global $more;
-					
-					ob_start();
-					
-					// Ensure all content is displayed
-					$more = 1;
-					
-					the_content();
-					
-					return ob_get_clean();
-				}
-			);
+			if ($content = $this->_getElementorProTemplate($post)) {
+				
+			}
+			else {
+				$content = $this->getCoreHelper()->simulatedCallback(
+					function() {
+						global $more;
+						
+						ob_start();
+						
+						// Ensure all content is displayed
+						$more = 1;
+						
+						the_content();
+						
+						return ob_get_clean();
+					}
+				);
+			}
 
 			if (strpos($content, '[product ') !== false) {
 				$content = preg_replace_callback('/\[product[^\]]*\]/', function($matches) {
@@ -469,5 +474,54 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		);
 
 		return $this;
+	}
+	
+	/*
+	 * Apply automatic Elementor Pro template if exists
+	 *
+	 *
+	 * @param  Varien_Event_Observer $observer
+	 * @return $this
+	 */
+	public function wordpressPostViewToHtmlObserver(Varien_Event_Observer $observer)
+	{
+		
+		return $this;
+	}
+	
+	protected function _getElementorProTemplate($post)
+	{
+		if (!$this->getCoreHelper()->simulatedCallback(function() {
+			include_once(ABSPATH . 'wp-admin/includes/plugin.php');
+			return is_plugin_active('elementor-pro/elementor-pro.php');
+		})) {
+			return false;
+		}
+
+		$isTemplateApplied = $this->getCoreHelper()->simulatedCallback(function($postType) {
+			$conds = get_option('elementor_pro_theme_builder_conditions');
+			
+			if (is_array($conds['single'])) {
+				foreach($conds['single'] as $templateId => $types) {
+					if (in_array('include/singular/' . $postType, $types)) {
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		}, array($post->getPostType()));
+		
+		if (!$isTemplateApplied) {
+			return false;
+		}
+
+		$html = $this->getCoreHelper()->getHtml();
+
+		if (preg_match('/<body[^>]*>(.*)<\/body>/Us', $html, $matches)) {
+			return preg_replace('/<script[^>]*>.*<\/script>/Us', '', $matches[1]);
+		}
+
+		return false;
 	}
 }
