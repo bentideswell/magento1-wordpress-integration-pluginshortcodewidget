@@ -498,19 +498,23 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			return false;
 		}
 
-		$isTemplateApplied = $this->getCoreHelper()->simulatedCallback(function($postType) {
+		$isTemplateApplied = $this->getCoreHelper()->simulatedCallback(function($postId, $postType) {
 			$conds = get_option('elementor_pro_theme_builder_conditions');
-			
+
 			if (is_array($conds['single'])) {
 				foreach($conds['single'] as $templateId => $types) {
 					if (in_array('include/singular/' . $postType, $types)) {
+						return true;
+					}
+
+					if (in_array('include/singular/' . $postType . '/' . $postId, $types)) {
 						return true;
 					}
 				}
 			}
 			
 			return false;
-		}, array($post->getPostType()));
+		}, array($post->getId(), $post->getPostType()));
 		
 		if (!$isTemplateApplied) {
 			return false;

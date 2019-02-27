@@ -4,6 +4,9 @@
  * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
+- 1.0.0.36
+- Added support for Elementor Pro templates
+
 - 1.0.0.34
 - Added support for Elementor templates
 
