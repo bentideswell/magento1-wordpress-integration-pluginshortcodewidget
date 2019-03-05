@@ -15,6 +15,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	static protected $wpPostCache = array();
 	
+	/*
+	 *
+	 */
+	protected $router;
+	
 	/**
 	 *
 	 *
@@ -489,6 +494,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this;
 	}
 	
+	/**
+	 *
+	 *
+	 *
+	 */
 	protected function _getElementorProTemplate($post)
 	{
 		if (!$this->getCoreHelper()->simulatedCallback(function() {
@@ -527,5 +537,34 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		}
 
 		return false;
+	}
+	
+	/**
+	 *
+	 *
+	 */
+	public function wordpressMatchRoutesBeforeAgainObserver(Varien_Event_Observer $observer)
+	{
+		$this->router = $observer->getEvent()
+			->getRouter()
+				->addRouteCallback(array($this, 'getPswRoutes'));
+	}
+	
+	/**
+	 *
+	 *
+	 */
+	public function getPswRoutes()
+	{
+		/* Handle dynamic routes */
+		$isErrorPage = $this->getCoreHelper()->simulatedCallback(function() {			
+			return is_404();
+		});
+		
+		if (!$isErrorPage) {
+			$this->router->addRoute('/.*/', 'wp_addon_pluginshortcodewidget/index/dynamic', []);
+		}
+
+		return $this;
 	}
 }

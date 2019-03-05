@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Fishpig_Wordpress_Addon_PluginShortcodeWidget>
-			<version>1.0.0.36</version>
+			<version>1.0.0.37</version>
 		</Fishpig_Wordpress_Addon_PluginShortcodeWidget>
 	</modules>
 	<global>
@@ -31,6 +31,15 @@
 					</wp_addon_pluginshortcodewidget>
 				</observers>
 			</wordpress_router_set_route_path>
+			<wordpress_match_routes_before_again>
+				<observers>
+					<wp_addon_pluginshortcodewidget>
+						<type>singleton</type>
+						<class>Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer</class>
+						<method>wordpressMatchRoutesBeforeAgainObserver</method>
+					</wp_addon_pluginshortcodewidget>
+				</observers>
+			</wordpress_match_routes_before_again>
 		</events>
 	</global>
 	<frontend>
@@ -83,6 +92,15 @@
 			</wordpress_post_view_to_html>
 			-->
 		</events>
+		<routers>
+			<wp_addon_pluginshortcodewidget>
+				<use>wordpress_addon</use>
+				<args>
+					<module>Fishpig_Wordpress_Addon_PluginShortcodeWidget</module>
+					<frontName>wp_addon_pluginshortcodewidget</frontName>
+				</args>
+			</wp_addon_pluginshortcodewidget>
+		</routers>
 	</frontend>
 	<wordpress>
 		<core>
