@@ -28,6 +28,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function applyStringFiltersObserver(Varien_Event_Observer $observer)
 	{
+
 		// Fix Documentor counter global
 		foreach($GLOBALS as $key => $value) {
 			if (strpos($key, 'doc_style_counter_') === 0) {
@@ -80,6 +81,40 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 		}
 		
+		// Divi
+		if (strpos($content, 'et_pb_') !== false) {
+  		if (preg_match_all('/et_pb_([a-z_]+)_([0-9_]+)/', $content, $matches)) {
+    		$elements = array('single' => array(), 'double' => array());
+
+    		foreach($matches[1] as $key => $match) {
+      		$numbers = $matches[2][$key];
+
+          $type = strpos($numbers, '_') !== false ? 'double' : 'single';
+
+      		if (!isset($elements[$type][$match])) {
+        		$elements[$type][$match] = array();
+      		}
+
+      		$elements[$type][$match][] = $numbers;
+    		}
+
+    		foreach($elements['single'] as $element => $types) {
+      		$first = false;
+      		
+      		foreach($types as $type) {
+        		if (!$first) {
+          		$first = (int)$type;
+        		}
+        		else if ($first === 0) {
+          		break;
+        		}
+
+            $content  = str_replace('et_pb_' . $element . '_' . $type, 'et_pb_' . $element . '_' . ($type - $first), $content);
+      		}	
+    		}
+  		}
+		}
+
 		// Revolution Slider
 		/*
 		if (strpos($content, 'id="rev_slider_') !== false) {
