@@ -174,10 +174,33 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			}
 			
+			// Get the CSS data (link and style tags)
+			// We'll store in a buffer using the position
+			// This ensures loading in the correct order
+			$cssBuffer = array();
+
+			if (preg_match_all('/<link[^>]{0,}>/Us', $wpHead, $matches)) {
+  			foreach($matches[0] as $match) {
+    		  $pos = (int)strpos($wpHead, $match);
+    		  $cssBuffer[$pos] = $match;
+  			}
+  		}
+  		
 			if (preg_match_all('/<style[^>]{0,}>.*<\/style>/Us', $wpHead, $matches)) {
 				foreach($matches[0] as $key => $match) {
-					$assets['head']['style_wp_head_' . $key] = $match;
+    		  $pos = (int)strpos($wpHead, $match);
+    		  $cssBuffer[$pos] = $match;
 				}
+			}
+			
+			if (count($cssBuffer) > 0) {
+  			$cssBuffer = array_values(array_unique($cssBuffer));
+
+  			foreach($cssBuffer as $key => $css) {
+    			if (strpos($css, 'stylesheet') !== false) {
+            $assets['head']['style_wp_head_' . $key] = $css;
+          }
+  			}
 			}
 		}
 
@@ -269,6 +292,25 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				}
 			}
 		}
+
+    // Divi
+    $diviKeys = array();
+    
+    foreach($combined as $key => $asset) {
+      if (strpos($asset, 'et_animation_data') !== false) {
+        $diviKeys[] = $key;
+      }
+    }
+    
+    if (count($diviKeys) > 1) {
+      array_pop($diviKeys);
+      
+      foreach($diviKeys as $diviKey) {
+        unset($combined[$diviKey]);
+      }
+      
+      $combined = array_values($combined);
+    }
 
 		return $combined;
 	}
