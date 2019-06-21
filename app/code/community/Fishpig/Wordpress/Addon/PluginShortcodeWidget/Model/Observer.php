@@ -28,7 +28,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function applyStringFiltersObserver(Varien_Event_Observer $observer)
 	{
-
 		// Fix Documentor counter global
 		foreach($GLOBALS as $key => $value) {
 			if (strpos($key, 'doc_style_counter_') === 0) {
@@ -59,6 +58,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		// Extract inline scripts
 		if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $content, $matches)) {
 			foreach($matches[0] as $key => $inlineScript) {
+  			if (strpos($inlineScript, 'opti-skip-move') !== false) {
+    			// Script needs to stay where it is!
+    			continue;
+  			}
+
 				$this->addInlineScript($inlineScript);
 				$content = str_replace($inlineScript, '', $content);
 			}
@@ -146,7 +150,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 *
 	 * @return bool
 	 */
-	public function getAssets()
+	public function getAssets(&$bodyHtml)
 	{
 		global $wp_styles, $wp_scripts;
 
@@ -168,12 +172,20 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		 * wp_head()
 		 */
 		if ($wpHead = $this->_getWpHeadOutput()) {
+  		$condMatches = $this->getConditionals($wpHead);
+  		
 			if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $wpHead, $matches)) {
 				foreach($matches[0] as $key => $match) {
+  				if ($condMatches) {
+            if (($it = array_search($match, $condMatches[1])) !== false) {
+              $match = $condMatches[0][$it];
+            }
+  				}
+
 					$assets['head']['script_wp_head_' . $key] = $match;
 				}
 			}
-			
+
 			// Get the CSS data (link and style tags)
 			// We'll store in a buffer using the position
 			// This ensures loading in the correct order
@@ -208,8 +220,16 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		 * wp_footer()
 		 */
 		if ($wpFooter = $this->_getWpFooterOutput()) {
+  		$condMatches = $this->getConditionals($wpFooter);
+  		
 			if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $wpFooter, $matches)) {
 				foreach($matches[0] as $key => $match) {
+  				if ($condMatches) {
+            if (($it = array_search($match, $condMatches[1])) !== false) {
+              $match = $condMatches[0][$it];
+            }
+  				}
+
 					$wpFooter = str_replace($match, '', $wpFooter);
 					$assets['footer']['script_wp_footer_' . $key] = $match;
 				}
@@ -643,5 +663,24 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		}
 
 		return $this;
+	}
+	
+	/**
+   *
+   *
+   */
+	protected function getConditionals($str)
+	{
+    preg_match_all('/<\!--\[if[^\>]*>[\s]{0,}(.*)[\s]{0,}<\!\[endif\]-->/sUi', $str, $condMatches);
+    
+    if (!$condMatches) {
+      return array();
+    }
+
+    foreach($condMatches[1] as $it => $value) {
+      $condMatches[1][$it] = trim($value);
+    }
+    
+    return $condMatches;
 	}
 }
