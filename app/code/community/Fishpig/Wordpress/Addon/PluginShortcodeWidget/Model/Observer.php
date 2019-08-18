@@ -617,6 +617,19 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 					if (in_array('include/singular/' . $postType . '/' . $postId, $types)) {
 						return true;
 					}
+					
+          foreach($types as $type) {
+            $find = 'include/singular/in_category/';
+            
+            if (strpos($type, $find) === 0) {
+              if ($categoryId = (int)substr($type, strlen($find))) {
+                
+                if (in_category($categoryId, $postId)) {
+                  return true;
+                }
+              }
+            }
+          }
 				}
 			}
 			

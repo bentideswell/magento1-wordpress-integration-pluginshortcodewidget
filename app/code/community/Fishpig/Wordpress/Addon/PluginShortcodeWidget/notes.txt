@@ -4,6 +4,9 @@
  * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
+- 2.2.0.29
+- Added fix for Rev Slider
+
 - 2.2.0.25
 - Fixed issue with opti-skip-move tags in script tags embedded directly into the post_content field
 
