@@ -407,16 +407,20 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		
 		if (!isset(self::$wpPostCache[$post->getId()])) {
 			self::$wpPostCache[$post->getId()] = $this->getCoreHelper()->simulatedCallback(
-				function($post) {
-					if ($wpPost = get_post((int)$post->getId())) {
-						setup_postdata($wpPost);
+				function($postId) {
+					global $post, $id;
+
+					if ($post = get_post($postId)) {
+  					$id = $postId;
+
+						setup_postdata($post);
 						
-						return $wpPost;
+						return $post;
 					}
 				
 					return false;
 				}, 
-				array($post)
+				array((int)$post->getId())
 			);
 		}
 		
