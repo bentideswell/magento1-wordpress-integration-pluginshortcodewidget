@@ -209,7 +209,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
   			$cssBuffer = array_values(array_unique($cssBuffer));
 
   			foreach($cssBuffer as $key => $css) {
-    			if (strpos($css, 'stylesheet') !== false) {
+    			if (strpos($css, 'stylesheet') !== false || strpos($css, '<style') !== false) {
             $assets['head']['style_wp_head_' . $key] = $css;
           }
   			}
