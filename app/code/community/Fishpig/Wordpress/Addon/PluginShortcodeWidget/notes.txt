@@ -4,6 +4,9 @@
  * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
+- 2.2.0.32
+- Added fix for WP Bakery frontend editor
+
 - 2.2.0.30
 - Added improved setting $post global. $id is now also set globally.
 

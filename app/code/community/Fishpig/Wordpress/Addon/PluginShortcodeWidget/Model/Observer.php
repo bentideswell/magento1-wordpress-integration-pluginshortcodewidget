@@ -152,6 +152,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function getAssets(&$bodyHtml)
 	{
+#  	echo $this->getCoreHelper()->getHtml();exit;
 		global $wp_styles, $wp_scripts;
 
 		if (preg_match('/<body[^>]+class="(.*)"/U', $this->getCoreHelper()->getHtml(), $classMatches)) {
@@ -372,6 +373,10 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				);
 			}
 
+      if (preg_match_all('/<!--FP-the_content-->(.*)<!--\/FP-the_content-->/Us', $this->getCoreHelper()->getHtml(), $matches)) {
+        $content = implode(PHP_EOL, $matches[1]) . $content;
+      }
+    
 			if (strpos($content, '[product ') !== false) {
 				$content = preg_replace_callback('/\[product[^\]]*\]/', function($matches) {
 					return str_replace(array('&#8221;', '&#8243;'), '"', $matches[0]);
@@ -659,6 +664,12 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function wordpressMatchRoutesBeforeAgainObserver(Varien_Event_Observer $observer)
 	{
+  	/* Patch for WP Bakery */
+    if (Mage::app()->getRequest()->getPost('vc_inline')) {
+      echo $this->getCoreHelper()->getHtml();
+      exit;      
+    }
+
 		$this->router = $observer->getEvent()
 			->getRouter()
 				->addRouteCallback(array($this, 'getPswRoutes'));
