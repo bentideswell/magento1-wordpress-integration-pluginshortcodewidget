@@ -1,6 +1,6 @@
 {
-    "name": "bentideswell/magento1-wordpress-integration-pluginshortcodewidget",
+    "name": "fishpig/magento1-wordpress-integration-pluginshortcodewidget",
     "description": "",
-    "version": "2.2.0.33",
+    "version": "2.2.0.34",
     "type": "magento-module"
 }
