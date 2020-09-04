@@ -617,7 +617,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		$isTemplateApplied = $this->getCoreHelper()->simulatedCallback(function($postId, $postType) {
 			$conds = get_option('elementor_pro_theme_builder_conditions');
 
-			if (is_array($conds['single'])) {
+			if (!empty($conds['single']) && is_array($conds['single'])) {
 				foreach($conds['single'] as $templateId => $types) {
 					if (in_array('include/singular/' . $postType, $types)) {
 						return true;
@@ -627,18 +627,17 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 						return true;
 					}
 					
-          foreach($types as $type) {
-            $find = 'include/singular/in_category/';
+                    foreach($types as $type) {
+                        $find = 'include/singular/in_category/';
             
-            if (strpos($type, $find) === 0) {
-              if ($categoryId = (int)substr($type, strlen($find))) {
-                
-                if (in_category($categoryId, $postId)) {
-                  return true;
-                }
-              }
-            }
-          }
+                        if (strpos($type, $find) === 0) {
+                            if ($categoryId = (int)substr($type, strlen($find))) {
+                                if (in_category($categoryId, $postId)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
 				}
 			}
 			
@@ -664,11 +663,11 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function wordpressMatchRoutesBeforeAgainObserver(Varien_Event_Observer $observer)
 	{
-  	/* Patch for WP Bakery */
-    if (Mage::app()->getRequest()->getPost('vc_inline')) {
-      echo $this->getCoreHelper()->getHtml();
-      exit;      
-    }
+        /* Patch for WP Bakery */
+        if (Mage::app()->getRequest()->getPost('vc_inline')) {
+            echo $this->getCoreHelper()->getHtml();
+            exit;      
+        }
 
 		$this->router = $observer->getEvent()
 			->getRouter()
@@ -699,16 +698,16 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
    */
 	protected function getConditionals($str)
 	{
-    preg_match_all('/<\!--\[if[^\>]*>[\s]{0,}(.*)[\s]{0,}<\!\[endif\]-->/sUi', $str, $condMatches);
+        preg_match_all('/<\!--\[if[^\>]*>[\s]{0,}(.*)[\s]{0,}<\!\[endif\]-->/sUi', $str, $condMatches);
     
-    if (!$condMatches) {
-      return array();
-    }
+        if (!$condMatches) {
+            return array();
+        }
 
-    foreach($condMatches[1] as $it => $value) {
-      $condMatches[1][$it] = trim($value);
-    }
+        foreach($condMatches[1] as $it => $value) {
+            $condMatches[1][$it] = trim($value);
+        }
     
-    return $condMatches;
+        return $condMatches;
 	}
 }
