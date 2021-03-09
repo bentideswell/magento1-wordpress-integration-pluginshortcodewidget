@@ -353,10 +353,12 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		try {
 			$post->setAsGlobal();
 
-			if ($content = $this->_getElementorProTemplate($post)) {
+
+            if ($content = $this->_getBeaverBuilderContent($post)) {
+                
+            } elseif ($content = $this->_getElementorProTemplate($post)) {
 				
-			}
-			else {
+			} else {
 				$content = $this->getCoreHelper()->simulatedCallback(
 					function() {
 						global $more;
@@ -373,9 +375,9 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 				);
 			}
 
-      if (preg_match_all('/<!--FP-the_content-->(.*)<!--\/FP-the_content-->/Us', $this->getCoreHelper()->getHtml(), $matches)) {
-        $content = implode(PHP_EOL, $matches[1]) . $content;
-      }
+            if (preg_match_all('/<!--FP-the_content-->(.*)<!--\/FP-the_content-->/Us', $this->getCoreHelper()->getHtml(), $matches)) {
+                $content = implode(PHP_EOL, $matches[1]) . $content;
+            }
     
 			if (strpos($content, '[product ') !== false) {
 				$content = preg_replace_callback('/\[product[^\]]*\]/', function($matches) {
@@ -391,8 +393,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 
 			$transport->setPostContent($this->processString($content));
-		}
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			$coreHelper->endWordPressSimulation();
 			Mage::helper('wordpress')->log($e);
 		}
@@ -669,11 +670,37 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
             exit;      
         }
 
+        /* Beaver Builder */
+        if ($this->doShowHtmlBeaverBuilder()) {
+            echo $this->getCoreHelper()->getHtml();
+            exit;
+        }
+        
 		$this->router = $observer->getEvent()
 			->getRouter()
 				->addRouteCallback(array($this, 'getPswRoutes'));
 	}
 	
+	/**
+     *
+     */
+	private function doShowHtmlBeaverBuilder()
+	{
+        if (!isset($_GET['fl_builder'])) {
+            return false;
+        }
+        
+        if (isset($_GET['fl_builder_load_settings_config'])) {
+            return true;
+        }
+        
+        if (isset($_SERVER['REQUEST_METHOD']) && strtolower($_SERVER['REQUEST_METHOD']) === 'post') {
+            return true;
+        }
+        
+        return false;
+	}
+
 	/**
 	 *
 	 *
@@ -709,5 +736,19 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
         }
     
         return $condMatches;
+	}
+	
+	/**
+     *
+     */
+	protected function _getBeaverBuilderContent($post)
+	{
+    	if (isset($_GET['fl_builder'])) {
+            if (preg_match('/<article[^>]*>.*<\/article>/iUs', $this->getCoreHelper()->getHtml(), $match)) {
+                return $match[0];
+            }
+        }
+        
+        return false;
 	}
 }
