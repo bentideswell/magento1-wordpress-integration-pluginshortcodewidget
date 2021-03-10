@@ -4,6 +4,9 @@
  * @url      https://fishpig.co.uk/magento/wordpress-integration/shortcodes-widgets/
  * @author   Ben Tideswell <ben@fishpig.co.uk>
  */
+- 2.2.1.3
+- Added further support for Beaver Builder, especially when using it on the homepage with Root.
+
 - 2.2.1.2
 - Fixed issues related to Beaver Builder.
 

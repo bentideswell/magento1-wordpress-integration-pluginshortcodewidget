@@ -58,10 +58,10 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		// Extract inline scripts
 		if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $content, $matches)) {
 			foreach($matches[0] as $key => $inlineScript) {
-  			if (strpos($inlineScript, 'opti-skip-move') !== false) {
-    			// Script needs to stay where it is!
-    			continue;
-  			}
+    			if (strpos($inlineScript, 'opti-skip-move') !== false) {
+        			// Script needs to stay where it is!
+                    continue;
+                }
 
 				$this->addInlineScript($inlineScript);
 				$content = str_replace($inlineScript, '', $content);
@@ -87,36 +87,35 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		
 		// Divi
 		if (strpos($content, 'et_pb_') !== false) {
-  		if (preg_match_all('/et_pb_([a-z_]+)_([0-9_]+)/', $content, $matches)) {
-    		$elements = array('single' => array(), 'double' => array());
+            if (preg_match_all('/et_pb_([a-z_]+)_([0-9_]+)/', $content, $matches)) {
+    		    $elements = array('single' => array(), 'double' => array());
 
-    		foreach($matches[1] as $key => $match) {
-      		$numbers = $matches[2][$key];
+                foreach($matches[1] as $key => $match) {
+                    $numbers = $matches[2][$key];
 
-          $type = strpos($numbers, '_') !== false ? 'double' : 'single';
+                    $type = strpos($numbers, '_') !== false ? 'double' : 'single';
 
-      		if (!isset($elements[$type][$match])) {
-        		$elements[$type][$match] = array();
-      		}
+                    if (!isset($elements[$type][$match])) {
+                        $elements[$type][$match] = array();
+                    }
 
-      		$elements[$type][$match][] = $numbers;
+                $elements[$type][$match][] = $numbers;
     		}
 
     		foreach($elements['single'] as $element => $types) {
-      		$first = false;
+          		$first = false;
       		
-      		foreach($types as $type) {
-        		if (!$first) {
-          		$first = (int)$type;
-        		}
-        		else if ($first === 0) {
-          		break;
-        		}
+                    foreach($types as $type) {
+                        if (!$first) {
+                            $first = (int)$type;
+                        } elseif ($first === 0) {
+                            break;
+                        }
 
-            $content  = str_replace('et_pb_' . $element . '_' . $type, 'et_pb_' . $element . '_' . ($type - $first), $content);
-      		}	
-    		}
-  		}
+                        $content  = str_replace('et_pb_' . $element . '_' . $type, 'et_pb_' . $element . '_' . ($type - $first), $content);
+                    }	
+                }
+            }
 		}
 
 		// Revolution Slider
@@ -145,7 +144,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $content;
 	}
 		
-	/*
+	/**
 	 * Get the CSS, JS and other content required for the plugin to function in Magento
 	 *
 	 * @return bool
@@ -173,15 +172,15 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		 * wp_head()
 		 */
 		if ($wpHead = $this->_getWpHeadOutput()) {
-  		$condMatches = $this->getConditionals($wpHead);
+            $condMatches = $this->getConditionals($wpHead);
   		
 			if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $wpHead, $matches)) {
-				foreach($matches[0] as $key => $match) {
-  				if ($condMatches) {
-            if (($it = array_search($match, $condMatches[1])) !== false) {
-              $match = $condMatches[0][$it];
-            }
-  				}
+				foreach ($matches[0] as $key => $match) {
+				  if ($condMatches) {
+                        if (($it = array_search($match, $condMatches[1])) !== false) {
+                            $match = $condMatches[0][$it];
+                        }
+                    }
 
 					$assets['head']['script_wp_head_' . $key] = $match;
 				}
@@ -193,27 +192,27 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			$cssBuffer = array();
 
 			if (preg_match_all('/<link[^>]{0,}>/Us', $wpHead, $matches)) {
-  			foreach($matches[0] as $match) {
-    		  $pos = (int)strpos($wpHead, $match);
-    		  $cssBuffer[$pos] = $match;
-  			}
-  		}
+    			foreach($matches[0] as $match) {
+                    $pos = (int)strpos($wpHead, $match);
+                    $cssBuffer[$pos] = $match;
+                }
+            }
   		
 			if (preg_match_all('/<style[^>]{0,}>.*<\/style>/Us', $wpHead, $matches)) {
 				foreach($matches[0] as $key => $match) {
-    		  $pos = (int)strpos($wpHead, $match);
-    		  $cssBuffer[$pos] = $match;
+                    $pos = (int)strpos($wpHead, $match);
+                    $cssBuffer[$pos] = $match;
 				}
 			}
 			
 			if (count($cssBuffer) > 0) {
-  			$cssBuffer = array_values(array_unique($cssBuffer));
+    			$cssBuffer = array_values(array_unique($cssBuffer));
 
-  			foreach($cssBuffer as $key => $css) {
-    			if (strpos($css, 'stylesheet') !== false || strpos($css, '<style') !== false) {
-            $assets['head']['style_wp_head_' . $key] = $css;
-          }
-  			}
+                  foreach($cssBuffer as $key => $css) {
+                    if (strpos($css, 'stylesheet') !== false || strpos($css, '<style') !== false) {
+                        $assets['head']['style_wp_head_' . $key] = $css;
+                    }
+                }
 			}
 		}
 
@@ -221,15 +220,15 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		 * wp_footer()
 		 */
 		if ($wpFooter = $this->_getWpFooterOutput()) {
-  		$condMatches = $this->getConditionals($wpFooter);
+            $condMatches = $this->getConditionals($wpFooter);
   		
 			if (preg_match_all('/<script[^>]{0,}>.*<\/script>/Us', $wpFooter, $matches)) {
 				foreach($matches[0] as $key => $match) {
-  				if ($condMatches) {
-            if (($it = array_search($match, $condMatches[1])) !== false) {
-              $match = $condMatches[0][$it];
-            }
-  				}
+                    if ($condMatches) {
+                        if (($it = array_search($match, $condMatches[1])) !== false) {
+                            $match = $condMatches[0][$it];
+                        }
+                    }
 
 					$wpFooter = str_replace($match, '', $wpFooter);
 					$assets['footer']['script_wp_footer_' . $key] = $match;
@@ -314,30 +313,29 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 			}
 		}
 
-    // Divi
-    $diviKeys = array();
-    
-    foreach($combined as $key => $asset) {
-      if (strpos($asset, 'et_animation_data') !== false) {
-        $diviKeys[] = $key;
-      }
-    }
-    
-    if (count($diviKeys) > 1) {
-      array_pop($diviKeys);
-      
-      foreach($diviKeys as $diviKey) {
-        unset($combined[$diviKey]);
-      }
-      
-      $combined = array_values($combined);
-    }
+        // Divi
+        $diviKeys = array();
+        
+        foreach($combined as $key => $asset) {
+            if (strpos($asset, 'et_animation_data') !== false) {
+                $diviKeys[] = $key;
+            }
+        }
+        
+        if (count($diviKeys) > 1) {
+            array_pop($diviKeys);
+          
+            foreach($diviKeys as $diviKey) {
+                unset($combined[$diviKey]);
+            }
+          
+            $combined = array_values($combined);
+        }
 
 		return $combined;
 	}
-	
-	
-	/*
+
+	/**
 	 * Get the WordPress post content
 	 * This adds support for the Elementor plugin
 	 *
@@ -401,7 +399,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this;
 	}
 	
-	/*
+	/**
 	 * Get the WP_Post object
 	 *
 	 * @param  Varien_Event_Observer $observer
@@ -435,8 +433,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this;
 	}
 	
-	/*
-	 *
+	/**
 	 *
 	 * @return string
 	 */
@@ -456,8 +453,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $wpHead;
 	}	
 
-	/*
-	 *
+	/**
 	 *
 	 * @return string
 	 */
@@ -488,7 +484,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this->getCoreHelper()->doShortcode($code);
 	}
 	
-	/*
+	/**
 	 *
 	 * @param  Varien_Event_Observer $observer
 	 * @return $this
@@ -502,7 +498,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this;
 	}
 	
-	/*
+	/**
 	 * Add an inline script
 	 *
 	 * @param string $script
@@ -515,7 +511,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this;
 	}
 	
-	/*
+	/**
 	 * Determine whether the current request is a 404 request
 	 *
 	 * @return bool
@@ -527,7 +523,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return strpos($html, '404') !== false && strpos($html, 'not found') !== false;
 	}
 	
-	/*
+	/**
 	 *
 	 */
 	public static function getCoreHelper()
@@ -535,7 +531,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return Mage::helper('wp_addon_pluginshortcodewidget/core');
 	}	
 	
-	/*
+	/**
 	 * Determine whether it is the Visual Editor mode
 	 *
 	 * @return bool
@@ -558,7 +554,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return false;
 	}
 	
-	/*
+	/**
 	 * Add support for Elementor templates
 	 *
 	 * @param  Varien_Event_Observer $observer
@@ -588,7 +584,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 		return $this;
 	}
 	
-	/*
+	/**
 	 * Apply automatic Elementor Pro template if exists
 	 *
 	 *
@@ -602,7 +598,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	}
 	
 	/**
-	 *
 	 *
 	 *
 	 */
@@ -664,6 +659,18 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	 */
 	public function wordpressMatchRoutesBeforeAgainObserver(Varien_Event_Observer $observer)
 	{
+    	$this->askWordPressToHandleRequest();
+        
+		$this->router = $observer->getEvent()
+			->getRouter()
+				->addRouteCallback(array($this, 'getPswRoutes'));
+	}
+	
+	/**
+     *
+     */
+	public function askWordPressToHandleRequest()
+	{
         /* Patch for WP Bakery */
         if (Mage::app()->getRequest()->getPost('vc_inline')) {
             echo $this->getCoreHelper()->getHtml();
@@ -675,10 +682,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
             echo $this->getCoreHelper()->getHtml();
             exit;
         }
-        
-		$this->router = $observer->getEvent()
-			->getRouter()
-				->addRouteCallback(array($this, 'getPswRoutes'));
 	}
 	
 	/**
@@ -689,6 +692,7 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
         if (!isset($_GET['fl_builder'])) {
             return false;
         }
+        
         
         if (isset($_GET['fl_builder_load_settings_config'])) {
             return true;
@@ -702,7 +706,6 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	}
 
 	/**
-	 *
 	 *
 	 */
 	public function getPswRoutes()
@@ -720,9 +723,9 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	}
 	
 	/**
-   *
-   *
-   */
+     *
+     *
+     */
 	protected function getConditionals($str)
 	{
         preg_match_all('/<\!--\[if[^\>]*>[\s]{0,}(.*)[\s]{0,}<\!\[endif\]-->/sUi', $str, $condMatches);
@@ -739,14 +742,19 @@ class Fishpig_Wordpress_Addon_PluginShortcodeWidget_Model_Observer
 	}
 	
 	/**
-     *
+     * @param Fishpig_Wordpress_Model_Post $post
+     * @return string|false
      */
 	protected function _getBeaverBuilderContent($post)
 	{
-    	if (isset($_GET['fl_builder'])) {
-            if (preg_match('/<article[^>]*>.*<\/article>/iUs', $this->getCoreHelper()->getHtml(), $match)) {
-                return $match[0];
-            }
+    	$showBeaverContent = isset($_GET['fl_builder'])
+        	|| (int)$post->getMetaValue('_fl_builder_enabled') === 1;
+    	
+    	if (
+    	    $showBeaverContent 
+    	    && preg_match('/<article[^>]*>.*<\/article>/iUs', $this->getCoreHelper()->getHtml(), $match)
+        ) {
+            return $match[0];
         }
         
         return false;
